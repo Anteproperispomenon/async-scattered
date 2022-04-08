@@ -68,7 +68,7 @@ runThreads' closer actions = withAsync dummyThread $ \asy -> bracket
 
 -- | Start a thread together with an action
 -- to perform when the thread finishes. Note
--- that the closing action occurs before the
+-- that the closing action occurs after the
 -- thread count is decremented.
 startThread :: 
   forall (b :: Type) (c :: Type). 
@@ -76,7 +76,7 @@ startThread ::
 startThread tm closer action = async $
   bracket_
     (do { linkOnly (const True) (tmDummy tm) ; incTC tm })
-    (do { closer ; decTC tm })
+    (do { decTC tm ; closer })
     action
 
 -- | Like `startThread`, but the closer is only used in errors.
@@ -86,7 +86,7 @@ startThreadE ::
 startThreadE tm closer action = async $
   bracketOnError
     (do { linkOnly (const True) (tmDummy tm) ; incTC tm })
-    (\_ -> do { closer ; decTC tm })
+    (\_ -> do { decTC tm ; closer })
     (\_ -> action)
 
 -- | Like `startThread`, but with separate closers
@@ -97,8 +97,8 @@ startThreadC ::
 startThreadC tm closer closerErr action = async $
   bracketChoice
     (do { linkOnly (const True) (tmDummy tm) ; incTC tm })
-    (\_ -> do { closer    ; decTC tm })
-    (\_ -> do { closerErr ; decTC tm })
+    (\_ -> do { decTC tm ; closer     })
+    (\_ -> do { decTC tm ; closerErr  })
     (\_ -> action)
 
 -- | Very similar to `bracket`, but with 
@@ -111,7 +111,7 @@ startThreadS ::
 startThreadS tm setup closer action = async $
   bracket
     (do { linkOnly (const True) (tmDummy tm) ; incTC tm ; setup })
-    (\x -> do { z <- closer x ; decTC tm ; return z })    
+    (\x -> do { decTC tm ; closer x })    
     action
 
 -- | Like `startThreadE`, but with a specific
@@ -122,7 +122,7 @@ startThreadSE ::
 startThreadSE tm setup closer action = async $
   bracketOnError
     (do { linkOnly (const True) (tmDummy tm) ; incTC tm ; setup })
-    (\x -> do { z <- closer x ; decTC tm ; return z })    
+    (\x -> do { decTC tm ; closer x })    
     action
 
 
@@ -134,8 +134,8 @@ startThreadSC ::
 startThreadSC tm setup closer closerErr action = async $
   bracketChoice
     (do { linkOnly (const True) (tmDummy tm) ; incTC tm ; setup })
-    (\x -> do { z <- closer    x ; decTC tm ; return z })
-    (\x -> do { z <- closerErr x ; decTC tm ; return z })
+    (\x -> do { decTC tm ; closer    x })
+    (\x -> do { decTC tm ; closerErr x })
     action
 
 -- | Get the current number of running threads
