@@ -1,10 +1,12 @@
 module Control.Concurrent.Async.Scattered.Internal.Race (
   raceTime,
+  runWithTimeout,
   ThreadTimeout(..),
 ) where
 
 import Control.Concurrent.Async
 import Control.Exception
+import Control.Concurrent (threadDelay)
 
 -- First thread is the "timer" thread.
 raceTime :: forall a b. IO a -> IO b -> IO (Maybe b)
@@ -22,3 +24,6 @@ data ThreadTimeout
 
 instance Exception ThreadTimeout
 
+-- | Run an action with a timeout value, in microseconds.
+runWithTimeout :: forall a. Int -> IO a -> IO (Maybe a)
+runWithTimeout n = raceTime (threadDelay n)
