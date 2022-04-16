@@ -21,6 +21,8 @@ import Control.Concurrent.STM
 import Control.Exception (bracket, bracket_, bracketOnError)
 import Data.Kind (Type)
 import Control.Exception.Bracket (bracketChoice)
+import Control.Concurrent.Async.Scattered.Internal.Linking (linkWrap)
+import Control.Concurrent.Async.Scattered.Internal.Exceptions (wrapHandlerException)
 
 -- | The thread manager, which handles linking
 -- of threads and counting running threads.
@@ -28,6 +30,11 @@ data ThreadManager = ThreadManager
   { tmDummy :: Async ()
   , tmCount :: TVar Integer
   } deriving (Eq)
+
+-- | Get a string representation of the `ThreadId`
+-- of the `ThreadManager`.
+threadManagerId :: ThreadManager -> String
+threadManagerId (ThreadManager {tmDummy = tm}) = show $ asyncThreadId tm
 
 -- The thread used to link other threads.
 -- This isn't exported; it's use is hidden
@@ -75,7 +82,7 @@ startThread ::
   ThreadManager -> IO b -> IO c -> IO (Async c)
 startThread tm closer action = async $
   bracket_
-    (do { linkOnly (const True) (tmDummy tm) ; incTC tm })
+    (do { linkHandler (tmDummy tm) ; incTC tm })
     (do { decTC tm ; closer })
     action
 
@@ -85,7 +92,7 @@ startThreadE ::
   ThreadManager -> IO b -> IO c -> IO (Async c)
 startThreadE tm closer action = async $
   bracketOnError
-    (do { linkOnly (const True) (tmDummy tm) ; incTC tm })
+    (do { linkHandler (tmDummy tm) ; incTC tm })
     (\_ -> do { decTC tm ; closer })
     (\_ -> action)
 
@@ -96,7 +103,7 @@ startThreadC ::
   ThreadManager -> IO b -> IO b' -> IO c -> IO (Async c)
 startThreadC tm closer closerErr action = async $
   bracketChoice
-    (do { linkOnly (const True) (tmDummy tm) ; incTC tm })
+    (do { linkHandler (tmDummy tm) ; incTC tm })
     (\_ -> do { decTC tm ; closer     })
     (\_ -> do { decTC tm ; closerErr  })
     (\_ -> action)
@@ -110,7 +117,7 @@ startThreadS ::
   ThreadManager -> IO a -> (a -> IO b) -> (a -> IO c) -> IO (Async c)
 startThreadS tm setup closer action = async $
   bracket
-    (do { linkOnly (const True) (tmDummy tm) ; incTC tm ; setup })
+    (do { linkHandler (tmDummy tm) ; incTC tm ; setup })
     (\x -> do { decTC tm ; closer x })    
     action
 
@@ -121,7 +128,7 @@ startThreadSE ::
   ThreadManager -> IO a -> (a -> IO b) -> (a -> IO c) -> IO (Async c)
 startThreadSE tm setup closer action = async $
   bracketOnError
-    (do { linkOnly (const True) (tmDummy tm) ; incTC tm ; setup })
+    (do { linkHandler (tmDummy tm) ; incTC tm ; setup })
     (\x -> do { decTC tm ; closer x })    
     action
 
@@ -133,7 +140,7 @@ startThreadSC ::
   ThreadManager -> IO a -> (a -> IO b) -> (a -> IO b') -> (a -> IO c) -> IO (Async c)
 startThreadSC tm setup closer closerErr action = async $
   bracketChoice
-    (do { linkOnly (const True) (tmDummy tm) ; incTC tm ; setup })
+    (do { linkHandler (tmDummy tm) ; incTC tm ; setup })
     (\x -> do { decTC tm ; closer    x })
     (\x -> do { decTC tm ; closerErr x })
     action
@@ -161,4 +168,10 @@ getThreadCountSTM (ThreadManager _ tc) = readTVar tc
 -- occurring and doesn't expose as much
 -- of the inner workings of the package.
 -- e.g. catch @(ExceptionInLinkedThread x).
+
+-- Unsure about whether putting the async into
+-- the handler is the right thing to do, rather
+-- than changing linkWrap to take an Async value.
+linkHandler :: Async () -> IO ()
+linkHandler asy = linkWrap (const True) (wrapHandlerException asy) asy
 
