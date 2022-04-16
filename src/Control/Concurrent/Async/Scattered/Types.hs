@@ -17,19 +17,13 @@ module Control.Concurrent.Async.Scattered.Types (
 ) where
 
 import Control.Concurrent.Async
+import Control.Concurrent.Async.Scattered.Internal.Types
 import Control.Concurrent.STM
 import Control.Exception (bracket, bracket_, bracketOnError)
 import Data.Kind (Type)
 import Control.Exception.Bracket (bracketChoice)
 import Control.Concurrent.Async.Scattered.Internal.Linking (linkWrap)
 import Control.Concurrent.Async.Scattered.Internal.Exceptions (wrapHandlerException)
-
--- | The thread manager, which handles linking
--- of threads and counting running threads.
-data ThreadManager = ThreadManager
-  { tmDummy :: Async ()
-  , tmCount :: TVar Integer
-  } deriving (Eq)
 
 -- | Get a string representation of the `ThreadId`
 -- of the `ThreadManager`.

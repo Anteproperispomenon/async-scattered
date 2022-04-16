@@ -29,6 +29,7 @@ library
       Control.Concurrent.Async.Scattered.Internal.Exceptions
       Control.Concurrent.Async.Scattered.Internal.Linking
       Control.Concurrent.Async.Scattered.Internal.Race
+      Control.Concurrent.Async.Scattered.Internal.Types
       Control.Concurrent.Async.Scattered.Types
       Control.Exception.Bracket
       Lib
