@@ -2,6 +2,8 @@ module Control.Concurrent.Async.Scattered.Internal.Types (
   ThreadManager(..),
   threadManagerId,
   dummyThread,
+  incTC,
+  decTC,
 ) where
 
 import Control.Concurrent.Async
@@ -29,3 +31,12 @@ dummyThread = do
   atomically $ do
     b <- readTVar tv
     check b
+
+-- Just a simple function to run when starting a thread.
+incTC :: ThreadManager -> IO ()
+incTC tm = atomically $ modifyTVar' (tmCount tm) (+1)
+
+-- Just a simple function to run when ending a thread.
+decTC :: ThreadManager -> IO ()
+decTC tm = atomically $ modifyTVar' (tmCount tm) (subtract 1)
+

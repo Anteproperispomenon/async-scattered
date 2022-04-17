@@ -25,28 +25,7 @@ import Control.Exception.Bracket (bracketChoice)
 import Control.Concurrent.Async.Scattered.Internal.Linking (linkWrap)
 import Control.Concurrent.Async.Scattered.Internal.Exceptions (wrapHandlerException)
 
--- | Get a string representation of the `ThreadId`
--- of the `ThreadManager`.
-threadManagerId :: ThreadManager -> String
-threadManagerId (ThreadManager {tmDummy = tm}) = show $ asyncThreadId tm
 
--- The thread used to link other threads.
--- This isn't exported; it's use is hidden
--- from the enduser.
-dummyThread :: IO ()
-dummyThread = do
-  tv <- newTVarIO False
-  atomically $ do
-    b <- readTVar tv
-    check b
-
--- Just a simple function to run when starting a thread.
-incTC :: ThreadManager -> IO ()
-incTC tm = atomically $ modifyTVar' (tmCount tm) (+1)
-
--- Just a simple function to run when ending a thread.
-decTC :: ThreadManager -> IO ()
-decTC tm = atomically $ modifyTVar' (tmCount tm) (subtract 1)
 
 -- | Run threads together with a `ThreadManager`
 -- that handles creation of new threads.
