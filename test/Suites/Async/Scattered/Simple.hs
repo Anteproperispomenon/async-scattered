@@ -34,6 +34,7 @@ simpleTest = do
   let thrds1 = fst $ fst rslt
       thrds2 = snd $ fst rslt
       mgr    = snd $ rslt
+  threadDelay 5000
   thrds3 <- getThreadCount mgr
   return (thrds1, thrds2, thrds3)
 
