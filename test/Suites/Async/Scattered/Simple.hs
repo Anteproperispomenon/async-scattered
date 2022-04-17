@@ -19,13 +19,13 @@ simpleTest = do
     -- Spawn the threads.
     mapM_ (\n -> startThread manager (return ()) (basicThread gate n)) lst
     -- Delay, for safety
-    threadDelay 3000000
+    threadDelay 300_000
     -- Get the # of threads
     thrds <- getThreadCount manager
     -- Allow the threads to start running
     atomically $ writeTVar gate True
     -- Wait some time
-    threadDelay 6500000
+    threadDelay 6_500_000
     -- Get the new thread count.
     thrds' <- getThreadCount manager
     -- Return some values
@@ -40,6 +40,7 @@ simpleTest = do
 
 basicThread :: TVar Bool -> Int -> IO ()
 basicThread tv n = do
+  -- Wait until gate is True before starting countdown.
   atomically (readTVar tv >>= check)
-  threadDelay (n * 1000000)
+  threadDelay (n * 1_000_000)
 

@@ -1,6 +1,8 @@
 module Control.Concurrent.Async.Scattered.Internal.Types (
   ThreadManager(..),
+  ThreadCounter(..),
   threadManagerId,
+  getThreadCounter,
   dummyThread,
   incTC,
   decTC,
@@ -39,4 +41,19 @@ incTC tm = atomically $ modifyTVar' (tmCount tm) (+1)
 -- Just a simple function to run when ending a thread.
 decTC :: ThreadManager -> IO ()
 decTC tm = atomically $ modifyTVar' (tmCount tm) (subtract 1)
+
+-- | A variant of `ThreadManager` that just includes
+-- the thread counting portion of it. This can safely
+-- be returned from a `runThreads` block without the
+-- possibility of changing 
+newtype ThreadCounter = ThreadCounter
+  { tcCount :: TVar Integer }
+  deriving (Eq)
+
+-- | Get a `ThreadCounter` that can be queried for
+-- the number of threads tied to a specific
+-- `ThreadManager` that are still running.
+getThreadCounter :: ThreadManager -> ThreadCounter
+getThreadCounter = ThreadCounter . tmCount
+
 

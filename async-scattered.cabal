@@ -43,6 +43,7 @@ library
       KindSignatures
       LambdaCase
       MultiWayIf
+      NumericUnderscores
       ScopedTypeVariables
       TupleSections
       TypeApplications
@@ -76,6 +77,18 @@ test-suite async-scattered-test
       Paths_async_scattered
   hs-source-dirs:
       test
+  default-extensions:
+      DataKinds
+      ImportQualifiedPost
+      KindSignatures
+      LambdaCase
+      MultiWayIf
+      NumericUnderscores
+      ScopedTypeVariables
+      TupleSections
+      TypeApplications
+      TypeOperators
+      ViewPatterns
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       async

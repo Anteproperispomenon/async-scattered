@@ -32,6 +32,7 @@ library:
     - KindSignatures
     - LambdaCase
     - MultiWayIf
+    - NumericUnderscores
     - ScopedTypeVariables
     - TupleSections
     - TypeApplications
@@ -53,6 +54,18 @@ tests:
   async-scattered-test:
     main:                Spec.hs
     source-dirs:         test
+    default-extensions:
+      - DataKinds
+      - ImportQualifiedPost
+      - KindSignatures
+      - LambdaCase
+      - MultiWayIf
+      - NumericUnderscores
+      - ScopedTypeVariables
+      - TupleSections
+      - TypeApplications
+      - TypeOperators
+      - ViewPatterns
     ghc-options:
     - -threaded
     - -rtsopts

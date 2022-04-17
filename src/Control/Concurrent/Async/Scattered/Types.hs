@@ -1,6 +1,7 @@
 module Control.Concurrent.Async.Scattered.Types (
   -- * Types
   ThreadManager,
+  ThreadCounter,
   -- * Starting the ThreadManager
   runThreads,
   runThreads',
@@ -14,6 +15,8 @@ module Control.Concurrent.Async.Scattered.Types (
   -- * Querying the ThreadManager
   getThreadCount,
   getThreadCountSTM,
+  readThreadCount,
+  readThreadCountSTM,
 ) where
 
 import Control.Concurrent.Async
@@ -133,6 +136,16 @@ getThreadCount (ThreadManager _ tc) = readTVarIO tc
 -- (`atomically` `.` `getThreadCountSTM).
 getThreadCountSTM :: ThreadManager -> STM Integer
 getThreadCountSTM (ThreadManager _ tc) = readTVar tc
+
+-- | Like `getThreadCount`, but using a 
+-- `ThreadCounter` instead of a `ThreadManager`.
+readThreadCount :: ThreadCounter -> IO Integer
+readThreadCount (ThreadCounter tc) = readTVarIO tc
+
+-- | Like `getThreadCountSTM`, but using a 
+-- `ThreadCounter` instead of a `ThreadManager`.
+readThreadCountSTM :: ThreadCounter -> STM Integer
+readThreadCountSTM (ThreadCounter tc) = readTVar tc
 
 -- TODO: Write an exception type for when
 -- a thread is cancelled by the thread 
