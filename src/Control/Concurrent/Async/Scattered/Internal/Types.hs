@@ -45,7 +45,10 @@ decTC tm = atomically $ modifyTVar' (tmCount tm) (subtract 1)
 -- | A variant of `ThreadManager` that just includes
 -- the thread counting portion of it. This can safely
 -- be returned from a `runThreads` block without the
--- possibility of changing 
+-- possibility of spawning new threads. This can be
+-- useful if you are writing a library, but still
+-- want to expose the number of threads running to
+-- the enduser.
 newtype ThreadCounter = ThreadCounter
   { tcCount :: TVar Integer }
   deriving (Eq)
