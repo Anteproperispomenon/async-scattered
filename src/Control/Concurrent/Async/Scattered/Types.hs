@@ -7,6 +7,7 @@ module Control.Concurrent.Async.Scattered.Types (
   runThreads',
   -- * Starting a Thread
   startThread,
+  startThreadX,
   startThreadE,
   startThreadC,
   startThreadS,
@@ -28,8 +29,6 @@ import Control.Exception.Bracket (bracketChoice)
 import Control.Concurrent.Async.Scattered.Internal.Linking (linkWrap)
 import Control.Concurrent.Async.Scattered.Internal.Exceptions (wrapHandlerException)
 
-
-
 -- | Run threads together with a `ThreadManager`
 -- that handles creation of new threads.
 runThreads :: forall (b :: Type). (ThreadManager -> IO b) -> IO b
@@ -49,20 +48,32 @@ runThreads' closer actions = withAsync dummyThread $ \asy -> bracket
   closer -- maybe more?
   actions
 
+-- | Start a thread without any action
+-- to perform when the thread finishes. 
+startThread :: 
+  forall (b :: Type) (c :: Type). 
+  ThreadManager -> IO c -> IO (Async c)
+startThread tm action = async $
+  bracket_
+    (do { linkHandler (tmDummy tm) ; incTC tm })
+    (decTC tm )
+    action
+
+
 -- | Start a thread together with an action
 -- to perform when the thread finishes. Note
 -- that the closing action occurs after the
 -- thread count is decremented.
-startThread :: 
+startThreadX :: 
   forall (b :: Type) (c :: Type). 
   ThreadManager -> IO b -> IO c -> IO (Async c)
-startThread tm closer action = async $
+startThreadX tm closer action = async $
   bracket_
     (do { linkHandler (tmDummy tm) ; incTC tm })
     (do { decTC tm ; closer })
     action
 
--- | Like `startThread`, but the closer is only used in errors.
+-- | Like `startThreadX`, but the closer is only used in errors.
 startThreadE :: 
   forall (b :: Type) (c :: Type). 
   ThreadManager -> IO b -> IO c -> IO (Async c)
@@ -72,7 +83,7 @@ startThreadE tm closer action = async $
     (\_ -> do { decTC tm ; closer })
     (\_ -> action)
 
--- | Like `startThread`, but with separate closers
+-- | Like `startThreadX`, but with separate closers
 -- for success and exceptions.
 startThreadC :: 
   forall (b :: Type) (b' :: Type) (c :: Type). 

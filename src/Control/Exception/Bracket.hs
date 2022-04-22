@@ -6,8 +6,8 @@ import Control.Exception (mask, onException)
 import Data.Kind (Type)
 
 -- | A combination of `Control.Exception.bracket` and 
--- `bracketOnError` that uses different closers when
--- when receiving an exception vs. ending normally.
+-- `Control.Exception.bracketOnError` that uses different 
+-- closers when receiving an exception vs. ending normally.
 bracketChoice 
   :: forall (a :: Type) (b :: Type) (b' :: Type) (c :: Type).
   IO a            -- ^ Computation to run first

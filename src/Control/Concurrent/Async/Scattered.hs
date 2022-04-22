@@ -29,9 +29,9 @@ module Control.Concurrent.Async.Scattered (
   -- is to do something like
   -- 
   -- > runThreads $ \mgr -> do
-  -- >   asy1 <- startThread mgr (return ()) action1
-  -- >   asy2 <- startThread mgr (return ()) action2
-  -- >   asy3 <- startThread mgr (return ()) action3
+  -- >   asy1 <- startThread mgr action1
+  -- >   asy2 <- startThread mgr action2
+  -- >   asy3 <- startThread mgr action3
   -- >   rst1 <- wait asy1
   -- >   rst2 <- wait asy2
   -- >   rst3 <- wait asy3
@@ -64,6 +64,7 @@ module Control.Concurrent.Async.Scattered (
   --
   -- (Put info about naming scheme here)
   startThread,
+  startThreadX,
   startThreadE,
   startThreadC,
   startThreadS,
