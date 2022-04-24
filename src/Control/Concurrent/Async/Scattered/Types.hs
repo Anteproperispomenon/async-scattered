@@ -1,3 +1,13 @@
+{-|
+Module      : Control.Concurrent.Async.Scattered.Types
+Copyright   : (c) David Wilson, 2022
+License     : BSD3
+
+This module contains the types for running 
+threads that are automatically cancelled,
+along with various functions to spawn them.
+-}
+
 module Control.Concurrent.Async.Scattered.Types (
   -- * Types
   ThreadManager,
@@ -51,7 +61,7 @@ runThreads' closer actions = withAsync dummyThread $ \asy -> bracket
 -- | Start a thread without any action
 -- to perform when the thread finishes. 
 startThread :: 
-  forall (b :: Type) (c :: Type). 
+  forall (c :: Type). 
   ThreadManager -> IO c -> IO (Async c)
 startThread tm action = async $
   bracket_

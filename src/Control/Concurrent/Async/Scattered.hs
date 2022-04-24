@@ -62,7 +62,34 @@ module Control.Concurrent.Async.Scattered (
   -- use the `ThreadManager` associated with that
   -- block. 
   --
-  -- (Put info about naming scheme here)
+  -- The naming scheme for the various `startThread`
+  -- functions is as follows:
+  --
+  --    - @S@ means that there is a "setup" aciton
+  --      that occurs before starting the main thread;
+  --      like the "before" part of a call to `bracket`.
+  --      Note that for functions with an @S@, the other
+  --      `IO` arguments ("action" and "closer") tkae an
+  --      argument, which is supplied using the return
+  --      value of the "setup" action.
+  --      Also note that @S@ on its own implies @X@ (see next).
+  --    - @X@ means that there is a closer on the function,
+  --      similar to the "after" part of a call to `bracket`.
+  --    - @E@ is similar to @X@, but the closer is only run
+  --      when the thread receives an exception, making it
+  --      similar to the "after" part of a call to
+  --      `bracketOnError`.
+  --    - @C@ works very similarly to @X@, but different
+  --      functions are run depending on whether the 
+  --      thread exited successfully, or if it received
+  --      an exception.
+  --
+  -- Note that for all the various `startThread` functions,
+  -- the "setup" and "closer" parts are run /after/ the linking
+  -- and incrementing/decrementing of the thread count. This is
+  -- because the "setups" and "closers" are user-supplied, and
+  -- thus could block, making them cancellable before linking
+  -- or incrementation/decrementation could occur.
   startThread,
   startThreadX,
   startThreadE,
@@ -72,4 +99,7 @@ module Control.Concurrent.Async.Scattered (
   startThreadSC,
 ) where
 
+import Control.Concurrent.Async
 import Control.Concurrent.Async.Scattered.Types
+import Control.Exception (bracket, bracketOnError)
+import Control.Monad (forever)
