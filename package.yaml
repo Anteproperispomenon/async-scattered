@@ -22,7 +22,10 @@ description:         Please see the README on GitHub at <https://github.com/gith
 dependencies:
 - base >= 4.7 && < 5
 - async
+- hashable
+- list-t
 - stm
+- stm-containers
 
 library:
   source-dirs: src
@@ -33,6 +36,7 @@ library:
     - LambdaCase
     - MultiWayIf
     - NumericUnderscores
+    - RankNTypes
     - ScopedTypeVariables
     - TupleSections
     - TypeApplications

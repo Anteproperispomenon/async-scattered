@@ -30,6 +30,8 @@ library
       Control.Concurrent.Async.Scattered.Internal.Linking
       Control.Concurrent.Async.Scattered.Internal.Race
       Control.Concurrent.Async.Scattered.Internal.Types
+      Control.Concurrent.Async.Scattered.Pooled.Internal.Types
+      Control.Concurrent.Async.Scattered.Pooled.Types
       Control.Concurrent.Async.Scattered.Types
       Control.Exception.Bracket
       Lib
@@ -44,6 +46,7 @@ library
       LambdaCase
       MultiWayIf
       NumericUnderscores
+      RankNTypes
       ScopedTypeVariables
       TupleSections
       TypeApplications
@@ -52,7 +55,10 @@ library
   build-depends:
       async
     , base >=4.7 && <5
+    , hashable
+    , list-t
     , stm
+    , stm-containers
   default-language: Haskell2010
 
 executable async-scattered-exe
@@ -66,7 +72,10 @@ executable async-scattered-exe
       async
     , async-scattered
     , base >=4.7 && <5
+    , hashable
+    , list-t
     , stm
+    , stm-containers
   default-language: Haskell2010
 
 test-suite async-scattered-test
@@ -94,5 +103,8 @@ test-suite async-scattered-test
       async
     , async-scattered
     , base >=4.7 && <5
+    , hashable
+    , list-t
     , stm
+    , stm-containers
   default-language: Haskell2010

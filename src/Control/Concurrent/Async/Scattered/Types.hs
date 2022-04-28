@@ -69,7 +69,6 @@ startThread tm action = async $
     (decTC tm )
     action
 
-
 -- | Start a thread together with an action
 -- to perform when the thread finishes. Note
 -- that the closing action occurs after the
@@ -129,7 +128,6 @@ startThreadSE tm setup closer action = async $
     (\x -> do { decTC tm ; closer x })    
     action
 
-
 -- | Very similar to `bracketChoice`, but with 
 -- automatic linking.
 startThreadSC ::
@@ -181,4 +179,3 @@ readThreadCountSTM (ThreadCounter tc) = readTVar tc
 -- than changing linkWrap to take an Async value.
 linkHandler :: Async () -> IO ()
 linkHandler asy = linkWrap (const True) (wrapHandlerException asy) asy
-
