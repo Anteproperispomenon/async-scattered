@@ -82,6 +82,7 @@ test-suite async-scattered-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      Suites.Async.Scattered.Pooled
       Suites.Async.Scattered.Simple
       Paths_async_scattered
   hs-source-dirs:

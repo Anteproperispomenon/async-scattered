@@ -1,16 +1,16 @@
-module Suites.Async.Scattered.Simple (
-  simpleTest,
+module Suites.Async.Scattered.Pooled (
+  pooledTest,
 ) where
 
 import Control.Concurrent (threadDelay)
 import Control.Concurrent.Async
-import Control.Concurrent.Async.Scattered.Types
+import Control.Concurrent.Async.Scattered.Pooled.Types
 import Control.Concurrent.STM
 import Control.Monad
 import Data.List (cycle)
 
-simpleTest :: IO (Integer, Integer, Integer)
-simpleTest = do
+pooledTest :: IO (Integer, Integer, Integer)
+pooledTest = do
   -- To prevent threads from finishing early.
   gate <- newTVarIO False
   rslt <- runThreads $ \manager -> do
@@ -34,7 +34,7 @@ simpleTest = do
   let thrds1 = fst $ fst rslt
       thrds2 = snd $ fst rslt
       mgr    = snd $ rslt
-  threadDelay 5000
+  -- threadDelay 5000
   thrds3 <- getThreadCount mgr
   return (thrds1, thrds2, thrds3)
 

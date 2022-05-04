@@ -13,6 +13,9 @@ module Control.Concurrent.Async.Scattered.Pooled.Types (
   startThreadS,
   startThreadSE,
   startThreadSC,
+  -- * Querying the Thread Manager
+  getThreadCount,
+  getThreadCountSTM,
 ) where
 
 import Control.Concurrent.Async
@@ -131,3 +134,17 @@ startThreadSC mgr@(ThreadManager thdSet) setup closer onErr action =
     atomically $ Set.delete this' thdSet
     closer bolt
     return rslt
+
+-- | Get the current number of running threads
+-- that are handled by this `ThreadManager`.
+-- Unlike the linked version, this is no
+-- faster than the STM version.
+getThreadCount :: ThreadManager -> IO Integer
+getThreadCount (ThreadManager mgrSet) =
+  fromIntegral <$> (atomically $ Set.size mgrSet)
+
+-- | Get the current number of running threads
+-- handled by the `ThreadManager`.
+getThreadCountSTM :: ThreadManager -> STM Integer
+getThreadCountSTM (ThreadManager mgrSet) =
+  fromIntegral <$> Set.size mgrSet
