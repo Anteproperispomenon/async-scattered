@@ -1,4 +1,5 @@
-module Control.Concurrent.Async.Scattered.Pooled.Types (
+
+module Control.Concurrent.Async.Scattered.PooledOld.Types (
     
   -- * Thread Manager
   ThreadManager,
@@ -18,8 +19,7 @@ module Control.Concurrent.Async.Scattered.Pooled.Types (
 ) where
 
 import Control.Concurrent.Async
-import Control.Concurrent.Async.Scattered.Pooled.Internal.Types
-import Control.Concurrent.MVar
+import Control.Concurrent.Async.Scattered.PooledOld.Internal.Types
 import Control.Concurrent.STM
 import Control.Exception
 import Control.Monad (void)
@@ -36,17 +36,13 @@ startThreadX ::
   forall (b :: Type) (c :: Type). 
   ThreadManager -> IO b -> IO c -> IO (Async c)
 startThreadX mgr@(ThreadManager thdSet) closer action =
-  mask_ $ do
-    mv <- newEmptyMVar
-    asy <- asyncWithUnmask $ \unmask -> do
-      this' <- AsyncX <$> takeMVar mv
-      atomically $ Set.insert this' thdSet
-      rslt <- unmask action `onException` (do { atomically $ Set.delete this' thdSet ; closer })
-      atomically $ Set.delete this' thdSet
-      closer
-      return rslt
-    putMVar mv asy
-    return asy
+  mask_ $ fixAsyncWithUnmask $ \this unmask -> do
+    let this' = AsyncX this
+    atomically $ Set.insert this' thdSet
+    rslt <- unmask action `onException` (do { atomically $ Set.delete this' thdSet ; closer })
+    atomically $ Set.delete this' thdSet
+    closer
+    return rslt
 
 -- | Start a new thread, using the 
 -- `ThreadManager` to handle it. Like
@@ -58,16 +54,12 @@ startThreadE ::
   forall (b :: Type) (c :: Type). 
   ThreadManager -> IO b -> IO c -> IO (Async c)
 startThreadE mgr@(ThreadManager thdSet) closer action =
-  mask_ $ do
-    mv <- newEmptyMVar
-    asy <- asyncWithUnmask $ \unmask -> do
-      this' <- AsyncX <$> takeMVar mv
-      atomically $ Set.insert this' thdSet
-      rslt <- unmask action `onException` (do { atomically $ Set.delete this' thdSet ; closer })
-      atomically $ Set.delete this' thdSet
-      return rslt
-    putMVar mv asy
-    return asy
+  mask_ $ fixAsyncWithUnmask $ \this unmask -> do
+    let this' = AsyncX this
+    atomically $ Set.insert this' thdSet
+    rslt <- unmask action `onException` (do { atomically $ Set.delete this' thdSet ; closer })
+    atomically $ Set.delete this' thdSet
+    return rslt
 
 -- | Start a new thread, using the 
 -- `ThreadManager` to handle it. This
@@ -80,17 +72,13 @@ startThreadC ::
   forall (b :: Type) (b' :: Type) (c :: Type). 
   ThreadManager -> IO b -> IO b' -> IO c -> IO (Async c)
 startThreadC mgr@(ThreadManager thdSet) closer onErr action =
-  mask_ $ do
-    mv <- newEmptyMVar
-    asy <- asyncWithUnmask $ \unmask -> do
-      this' <- AsyncX <$> takeMVar mv
-      atomically $ Set.insert this' thdSet
-      rslt <- unmask action `onException` (do { atomically $ Set.delete this' thdSet ; onErr })
-      atomically $ Set.delete this' thdSet
-      closer
-      return rslt
-    putMVar mv asy
-    return asy
+  mask_ $ fixAsyncWithUnmask $ \this unmask -> do
+    let this' = AsyncX this
+    atomically $ Set.insert this' thdSet
+    rslt <- unmask action `onException` (do { atomically $ Set.delete this' thdSet ; onErr })
+    atomically $ Set.delete this' thdSet
+    closer
+    return rslt
 
 -- | Start a new thread, using the 
 -- `ThreadManager` to handle it. This
@@ -102,18 +90,14 @@ startThreadS ::
   forall (a :: Type) (b :: Type) (c :: Type). 
   ThreadManager -> IO a -> (a -> IO b) -> (a -> IO c) -> IO (Async c)
 startThreadS mgr@(ThreadManager thdSet) setup closer action =
-  mask_ $ do
-    mv <- newEmptyMVar
-    asy <- asyncWithUnmask $ \unmask -> do
-      this' <- AsyncX <$> takeMVar mv
-      atomically $ Set.insert this' thdSet
-      bolt <- setup
-      rslt <- unmask (action bolt) `onException` (do { atomically $ Set.delete this' thdSet ; closer bolt })
-      atomically $ Set.delete this' thdSet
-      closer bolt
-      return rslt
-    putMVar mv asy
-    return asy
+  mask_ $ fixAsyncWithUnmask $ \this unmask -> do
+    let this' = AsyncX this
+    atomically $ Set.insert this' thdSet
+    bolt <- setup
+    rslt <- unmask (action bolt) `onException` (do { atomically $ Set.delete this' thdSet ; closer bolt })
+    atomically $ Set.delete this' thdSet
+    closer bolt
+    return rslt
 
 -- | Start a new thread, using the 
 -- `ThreadManager` to handle it.
@@ -124,17 +108,13 @@ startThreadSE ::
   forall (a :: Type) (b :: Type) (c :: Type). 
   ThreadManager -> IO a -> (a -> IO b) -> (a -> IO c) -> IO (Async c)
 startThreadSE mgr@(ThreadManager thdSet) setup closer action =
-  mask_ $ do
-    mv <- newEmptyMVar
-    asy <- asyncWithUnmask $ \unmask -> do
-      this' <- AsyncX <$> takeMVar mv
-      atomically $ Set.insert this' thdSet
-      bolt <- setup
-      rslt <- unmask (action bolt) `onException` (do { atomically $ Set.delete this' thdSet ; closer bolt })
-      atomically $ Set.delete this' thdSet
-      return rslt
-    putMVar mv asy
-    return asy
+  mask_ $ fixAsyncWithUnmask $ \this unmask -> do
+    let this' = AsyncX this
+    atomically $ Set.insert this' thdSet
+    bolt <- setup
+    rslt <- unmask (action bolt) `onException` (do { atomically $ Set.delete this' thdSet ; closer bolt })
+    atomically $ Set.delete this' thdSet
+    return rslt
 
 -- | Start a new thread, using the 
 -- `ThreadManager` to handle it. Like
@@ -146,18 +126,14 @@ startThreadSC ::
   forall (a :: Type) (b :: Type) (b' :: Type) (c :: Type). 
   ThreadManager -> IO a -> (a -> IO b) -> (a -> IO b') -> (a -> IO c) -> IO (Async c)
 startThreadSC mgr@(ThreadManager thdSet) setup closer onErr action =
-  mask_ $ do
-    mv <- newEmptyMVar
-    asy <- asyncWithUnmask $ \unmask -> do
-      this' <- AsyncX <$> takeMVar mv
-      atomically $ Set.insert this' thdSet
-      bolt <- setup
-      rslt <- unmask (action bolt) `onException` (do { atomically $ Set.delete this' thdSet ; onErr bolt })
-      atomically $ Set.delete this' thdSet
-      closer bolt
-      return rslt
-    putMVar mv asy
-    return asy
+  mask_ $ fixAsyncWithUnmask $ \this unmask -> do
+    let this' = AsyncX this
+    atomically $ Set.insert this' thdSet
+    bolt <- setup
+    rslt <- unmask (action bolt) `onException` (do { atomically $ Set.delete this' thdSet ; onErr bolt })
+    atomically $ Set.delete this' thdSet
+    closer bolt
+    return rslt
 
 -- | Get the current number of running threads
 -- that are handled by this `ThreadManager`.

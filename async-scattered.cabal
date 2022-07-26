@@ -32,6 +32,8 @@ library
       Control.Concurrent.Async.Scattered.Internal.Types
       Control.Concurrent.Async.Scattered.Pooled.Internal.Types
       Control.Concurrent.Async.Scattered.Pooled.Types
+      Control.Concurrent.Async.Scattered.PooledOld.Internal.Types
+      Control.Concurrent.Async.Scattered.PooledOld.Types
       Control.Concurrent.Async.Scattered.Types
       Control.Exception.Bracket
       Lib
