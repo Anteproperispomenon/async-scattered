@@ -1,7 +1,4 @@
-{-# LANGUAGE ExistentialQuantification #-}
-{-# LANGUAGE RecursiveDo #-}
-
-module Control.Concurrent.Async.Scattered.PooledOld.Internal.Types (
+module Control.Concurrent.Async.Scattered.Pooled.Internal.Types (
   -- * Thread Manager
   ThreadManager(..),
   runThreads,
@@ -15,11 +12,10 @@ module Control.Concurrent.Async.Scattered.PooledOld.Internal.Types (
   cancelWithX,
   uninterruptibleCancelX,
   waitX,
-  -- * Others
-  fixAsyncWithUnmask,
 ) where
 
 import Control.Concurrent.Async
+import Control.Concurrent.MVar
 import Control.Concurrent.STM
 import Control.Exception
 import Control.Monad (void)
@@ -79,12 +75,16 @@ startThread ::
   forall (c :: Type). 
   ThreadManager -> IO c -> IO (Async c)
 startThread mgr@(ThreadManager thdSet) action =
-  mask_ $ fixAsyncWithUnmask $ \this unmask -> do
-    let this' = AsyncX this
-    atomically $ Set.insert this' thdSet
-    rslt <- unmask action `onException` (atomically $ Set.delete this' thdSet)
-    atomically $ Set.delete this' thdSet
-    return rslt
+  mask_ $ do
+    mv <- newEmptyMVar
+    asy <- asyncWithUnmask $ \unmask -> do
+      this' <- AsyncX <$> takeMVar mv
+      atomically $ Set.insert this' thdSet
+      rslt <- unmask action `onException` (atomically $ Set.delete this' thdSet)
+      atomically $ Set.delete this' thdSet
+      return rslt
+    putMVar mv asy
+    return asy
 
 -- | Cancel all threads handled by
 -- a thread manager, and remove them
@@ -111,12 +111,6 @@ cancelAllP :: ThreadManager -> IO (Async ())
 cancelAllP mgr@(ThreadManager thdSet) = do
   rslt <- mask_ $ atomically $ LT.toList $ Set.listT thdSet
   startThread mgr $ mapConcurrently_ cancelX rslt
-
--- From async-extras
-fixAsyncWithUnmask :: forall (a :: Type). (Async a -> (forall b . IO b -> IO b) -> IO a) -> IO (Async a)
-fixAsyncWithUnmask f = mdo 
-    this <- asyncWithUnmask $ f this
-    return this
 
 -- | Use a `ThreadManager` to be able
 -- to start threads as needed, but still
