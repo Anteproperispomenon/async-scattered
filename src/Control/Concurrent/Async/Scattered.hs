@@ -54,7 +54,6 @@ module Control.Concurrent.Async.Scattered (
   -- return a value that can't be used improperly,
   -- look at `ThreadCounter`.
   runThreads,
-  runThreads',
   -- * Spawning Threads
   -- 
   -- | Spawning a new thread must be done within a
@@ -100,6 +99,6 @@ module Control.Concurrent.Async.Scattered (
 ) where
 
 import Control.Concurrent.Async
-import Control.Concurrent.Async.Scattered.Types
+import Control.Concurrent.Async.Scattered.Pooled.Types
 import Control.Exception (bracket, bracketOnError)
 import Control.Monad (forever)

@@ -1,3 +1,5 @@
+{-# LANGUAGE ExistentialQuantification #-}
+
 module Control.Concurrent.Async.Scattered.Pooled.Internal.Types (
   -- * Thread Manager
   ThreadManager(..),
