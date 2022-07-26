@@ -1,4 +1,4 @@
-module Control.Concurrent.Async.Scattered.Internal.Linking (
+module Control.Concurrent.Async.Scattered.Linked.Internal.Linking (
   linkWrap,
 ) where
 
