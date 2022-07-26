@@ -1,4 +1,4 @@
-module Control.Concurrent.Async.Scattered.Internal.Types (
+module Control.Concurrent.Async.Scattered.Linked.Internal.Types (
   ThreadManager(..),
   ThreadCounter(..),
   threadManagerId,
