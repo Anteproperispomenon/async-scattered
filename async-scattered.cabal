@@ -64,6 +64,8 @@ library
 executable async-scattered-exe
   main-is: Main.hs
   other-modules:
+      Linked
+      Pooled
       Paths_async_scattered
   hs-source-dirs:
       app
