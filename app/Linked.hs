@@ -6,7 +6,7 @@ module Linked (
 
 import Control.Concurrent (threadDelay)
 import Control.Concurrent.Async
-import Control.Concurrent.Async.Scattered.Types
+import Control.Concurrent.Async.Scattered.Linked.Types
 import Control.Concurrent.STM
 import Control.Monad
 import Data.List (cycle)

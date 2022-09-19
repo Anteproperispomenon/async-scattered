@@ -1,5 +1,5 @@
 {-|
-Module      : Control.Concurrent.Async.Scattered.Types
+Module      : Control.Concurrent.Async.Scattered.Linked.Types
 Copyright   : (c) David Wilson, 2022
 License     : BSD3
 
@@ -8,7 +8,7 @@ threads that are automatically cancelled,
 along with various functions to spawn them.
 -}
 
-module Control.Concurrent.Async.Scattered.Types (
+module Control.Concurrent.Async.Scattered.Linked.Types (
   -- * Types
   ThreadManager,
   ThreadCounter,
@@ -31,13 +31,13 @@ module Control.Concurrent.Async.Scattered.Types (
 ) where
 
 import Control.Concurrent.Async
-import Control.Concurrent.Async.Scattered.Internal.Types
+import Control.Concurrent.Async.Scattered.Linked.Internal.Types
 import Control.Concurrent.STM
 import Control.Exception (bracket, bracket_, bracketOnError)
 import Data.Kind (Type)
 import Control.Exception.Bracket (bracketChoice)
-import Control.Concurrent.Async.Scattered.Internal.Linking (linkWrap)
-import Control.Concurrent.Async.Scattered.Internal.Exceptions (wrapHandlerException)
+import Control.Concurrent.Async.Scattered.Linked.Internal.Linking (linkWrap)
+import Control.Concurrent.Async.Scattered.Linked.Internal.Exceptions (wrapHandlerException)
 
 -- | Run threads together with a `ThreadManager`
 -- that handles creation of new threads.

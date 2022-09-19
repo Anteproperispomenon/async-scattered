@@ -1,4 +1,4 @@
-module Control.Concurrent.Async.Scattered.Internal.Exceptions (
+module Control.Concurrent.Async.Scattered.Linked.Internal.Exceptions (
   ThreadHandlerException(..),
   wrapHandlerException,
 ) where

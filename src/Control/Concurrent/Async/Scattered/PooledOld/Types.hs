@@ -1,4 +1,3 @@
-
 module Control.Concurrent.Async.Scattered.PooledOld.Types (
     
   -- * Thread Manager
